@@ -5,7 +5,7 @@ import datetime
 client = commands.Bot(command_prefix='.')
 client.remove_command('help')
 
-TOKEN = 'PUT YOUR BOT TOKEN HERE!'
+TOKEN = 'PUT YOUR TOKEN HERE!'
 
 
 # ---------------------------------------
@@ -54,7 +54,7 @@ async def help(ctx):
     help_embed.add_field(name=';setShout [message]', value='Allows the user to set a message to post in the #announcements channel', inline=False)
     help_embed.add_field(name=';shout [#channel]', value='Posts the message set after using the "setShout" command in the mentioned channel', inline=False)
     help_embed.add_field(name=';purge [amount]', value='Deletes a specific amount of messages found in the current channel', inline=False)
-    help_embed.add_field(name='---- More questions? ----', value='For more information, please contact the creator of this bot: Joyiscold#2552', inline=False)
+    help_embed.add_field(name='---- More questions? ----', value='For more information, please contact the creator of this bot: PUT YOUR NAME HERE', inline=False)
 
     await ctx.author.send(embed=help_embed)
     await ctx.send(f'A list of available commands has been sent to you by DMs. {ctx.author.mention}')
