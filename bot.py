@@ -30,7 +30,8 @@ async def help(ctx):
     # Public Commands
     help_embed.add_field(name='---- Public Commands ----', value='A list of public commands', inline=False)
     help_embed.add_field(name=';help', value='Lists available commands', inline=False)
-    help_embed.add_field(name=';random [min][max]', value='Generates a random number between the minimum and maximum values', inline=False)
+    help_embed.add_field(name=';random [min][max]',
+                         value='Generates a random number between the minimum and maximum values', inline=False)
     help_embed.add_field(name=';invite', value='Creates an invite link that never expires', inline=False)
     help_embed.add_field(name=';logo', value='Shows the Joyton Corporation logo', inline=False)
     help_embed.add_field(name=';members', value='Displays the amount of members present in the server', inline=False)
@@ -40,7 +41,8 @@ async def help(ctx):
     help_embed.add_field(name=';sinfo', value='Displays general server information', inline=False)
 
     # Administrative Commands
-    help_embed.add_field(name='---- Administrative Commands ----', value='A list of administrative commands', inline=False)
+    help_embed.add_field(name='---- Administrative Commands ----', value='A list of administrative commands',
+                         inline=False)
     help_embed.add_field(name=';kick [@user] [reason]', value='Kicks the mentioned user', inline=False)
     help_embed.add_field(name=';ban [@user] [reason] ', value='Bans the mentioned user', inline=False)
     help_embed.add_field(name=';unban [username#tag', value='Unbans the mentioned user', inline=False)
@@ -49,12 +51,21 @@ async def help(ctx):
     help_embed.add_field(name=';unmute [@user]', value='Unmutes the mentioned user', inline=False)
     help_embed.add_field(name=';deletechannel [#channel]', value='Deletes the mentioned channel', inline=False)
     help_embed.add_field(name=';deleterole [@role]', value='Deletes the mentioned role', inline=False)
-    help_embed.add_field(name=';setAnnounce [message]', value='Allows the user to set a message to send to other users', inline=False)
-    help_embed.add_field(name=';announce [@user]', value='DMs the mentioned user the message set after using the "setAnnounce" command', inline=False)
-    help_embed.add_field(name=';setShout [message]', value='Allows the user to set a message to post in the #announcements channel', inline=False)
-    help_embed.add_field(name=';shout [#channel]', value='Posts the message set after using the "setShout" command in the mentioned channel', inline=False)
-    help_embed.add_field(name=';purge [amount]', value='Deletes a specific amount of messages found in the current channel', inline=False)
-    help_embed.add_field(name='---- More questions? ----', value='For more information, please contact the creator of this bot: PUT YOUR NAME HERE', inline=False)
+    help_embed.add_field(name=';setAnnounce [message]', value='Allows the user to set a message to send to other users',
+                         inline=False)
+    help_embed.add_field(name=';announce [@user]',
+                         value='DMs the mentioned user the message set after using the "setAnnounce" command',
+                         inline=False)
+    help_embed.add_field(name=';setShout [message]',
+                         value='Allows the user to set a message to post in the #announcements channel', inline=False)
+    help_embed.add_field(name=';shout [#channel]',
+                         value='Posts the message set after using the "setShout" command in the mentioned channel',
+                         inline=False)
+    help_embed.add_field(name=';purge [amount]',
+                         value='Deletes a specific amount of messages found in the current channel', inline=False)
+    help_embed.add_field(name='---- More questions? ----',
+                         value='For more information, please contact the creator of this bot: PUT YOUR NAME HERE',
+                         inline=False)
 
     await ctx.author.send(embed=help_embed)
     await ctx.send(f'A list of available commands has been sent to you by DMs. {ctx.author.mention}')
@@ -139,7 +150,8 @@ async def unban(ctx, *, member):
             await ctx.send(embed=valid_unban_embed)
             return
 
-        if (user.name, user.discriminator) != (member_name, member_discriminator) and banned_users.index(ban_entry) == len(banned_users) - 1:
+        if (user.name, user.discriminator) != (member_name, member_discriminator) and banned_users.index(
+                ban_entry) == len(banned_users) - 1:
             await ctx.send(embed=invalid_unban_embed)
             return
 
@@ -163,6 +175,42 @@ async def bans(ctx):
         bans_embed.add_field(name=f'{user.name}', value=f'#{user.discriminator}', inline=False)
 
     await ctx.send(embed=bans_embed)
+
+
+# ---------------------------------------
+# Announce Command
+# ---------------------------------------
+@client.command()
+async def announce(ctx, *, message):
+    server_name = ctx.guild.name
+    server_icon = ctx.guild.icon_url
+    members_list = ctx.guild.members
+
+    announce_embed = discord.Embed(
+        title=f"Announcement from {server_name}",
+        color=discord.Color.blurple(),
+        timestamp=datetime.datetime.utcnow()
+    )
+
+    announced_embed = discord.Embed(
+        title="Success",
+        description="Successfully announced your message!",
+        color=discord.Color.purple(),
+        timestamp=datetime.datetime.utcnow()
+    )
+
+    announce_embed.add_field(name=f'Message sent by {ctx.author}', value=f'{message}', inline=False)
+    announce_embed.set_thumbnail(url=server_icon)
+
+    for member in members_list:
+        try:
+            if not member.bot:
+                await member.send(embed=announce_embed)
+                print(f'Sent a message to {member}')
+        except discord.errors.Forbidden:
+            print(f'Could not message {member}')
+
+    await ctx.send(embed=announced_embed)
 
 
 client.run(TOKEN)
