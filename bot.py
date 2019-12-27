@@ -4,7 +4,7 @@ import datetime
 import time
 
 client = commands.Bot(command_prefix='.')
-client.remove_command('help')
+client.remove_command('help') 
 start_time = datetime.datetime.utcnow()
 
 TOKEN = 'TOKEN'
