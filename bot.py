@@ -1,11 +1,13 @@
 import discord
 from discord.ext import commands
 import datetime
+import time
 
 client = commands.Bot(command_prefix='.')
 client.remove_command('help')
+start_time = datetime.datetime.utcnow()
 
-TOKEN = 'PUT YOUR TOKEN HERE!'
+TOKEN = 'TOKEN'
 
 
 # ---------------------------------------
@@ -92,6 +94,7 @@ async def ping(ctx):
 # Kick Command
 # ---------------------------------------
 @client.command()
+@commands.has_permissions(kick_members=True)
 async def kick(ctx, member: discord.Member, *, reason=None):
     kick_embed = discord.Embed(
         title="User kicked",
@@ -108,6 +111,7 @@ async def kick(ctx, member: discord.Member, *, reason=None):
 # Ban Command
 # ---------------------------------------
 @client.command()
+@commands.has_permissions(ban_members=True)
 async def ban(ctx, member: discord.Member, *, reason=None):
     ban_embed = discord.Embed(
         title="User banned",
@@ -124,6 +128,7 @@ async def ban(ctx, member: discord.Member, *, reason=None):
 # Unban Command
 # ---------------------------------------
 @client.command()
+@commands.has_permissions(ban_members=True)
 async def unban(ctx, *, member):
     banned_users = await ctx.guild.bans()
     member_name, member_discriminator = member.split('#')
@@ -160,6 +165,7 @@ async def unban(ctx, *, member):
 # Bans Command
 # ---------------------------------------
 @client.command()
+@commands.has_permissions(ban_members=True)
 async def bans(ctx):
     banned_users = await ctx.guild.bans()
 
@@ -169,18 +175,28 @@ async def bans(ctx):
         timestamp=datetime.datetime.utcnow()
     )
 
-    for banned_user in banned_users:
-        user = banned_user.user
+    no_banned_users_embed = discord.Embed(
+        title="There are no banned users in this server",
+        color=discord.Color.red(),
+        timestamp=datetime.datetime.utcnow()
+    )
 
-        bans_embed.add_field(name=f'{user.name}', value=f'#{user.discriminator}', inline=False)
+    if len(banned_users) == 0:
+        await ctx.send(embed=no_banned_users_embed)
 
-    await ctx.send(embed=bans_embed)
+    else:
+        for banned_user in banned_users:
+            user = banned_user.user
+            bans_embed.add_field(name=f'{user.name}', value=f'#{user.discriminator}', inline=False)
+
+        await ctx.send(embed=bans_embed)
 
 
 # ---------------------------------------
 # Announce Command
 # ---------------------------------------
 @client.command()
+@commands.has_permissions(administrator=True)
 async def announce(ctx, *, message):
     server_name = ctx.guild.name
     server_icon = ctx.guild.icon_url
@@ -207,10 +223,69 @@ async def announce(ctx, *, message):
             if not member.bot:
                 await member.send(embed=announce_embed)
                 print(f'Sent a message to {member}')
+                time.sleep(1)
         except discord.errors.Forbidden:
             print(f'Could not message {member}')
 
     await ctx.send(embed=announced_embed)
+
+
+# ---------------------------------------
+# Uptime Command
+# ---------------------------------------
+@client.command()
+async def uptime(ctx):
+    current_time = datetime.datetime.utcnow()
+    uptime = current_time - start_time
+    uptime = str(uptime)
+    uptime_index = uptime.index('.')
+
+    if int(uptime[uptime_index + 1]) >= 5 and int(uptime[uptime_index - 1]) != 9:
+        uptime_list = list(uptime)
+        uptime_list[uptime_index - 1] = str(int(uptime_list[uptime_index - 1]) + 1)
+        uptime = "".join(uptime_list)
+
+    uptime = uptime[:uptime.index('.')]
+
+    uptime_embed = discord.Embed(
+        title=f"This bot has been up for {uptime} hours",
+        color=discord.Color.green(),
+        timestamp=datetime.datetime.utcnow()
+    )
+
+    await ctx.send(embed=uptime_embed)
+
+
+# ---------------------------------------
+# Members Command
+# ---------------------------------------
+@client.command()
+async def members(ctx):
+    members_list = ctx.guild.members
+    total_members_count = len(members_list)
+    online_members_count = 0
+    offline_members_count = 0
+    idle_members_count = 0
+
+    for i in members_list:
+        if str(i.status) == "online":
+            online_members_count += 1
+        elif str(i.status) == "offline":
+            offline_members_count += 1
+        elif str(i.status) == "idle":
+            idle_members_count += 1
+
+    members_embed = discord.Embed(
+        color=discord.Color.dark_teal(),
+        timestamp=datetime.datetime.utcnow()
+    )
+
+    members_embed.add_field(name='Members', value=f'{total_members_count}', inline=True)
+    members_embed.add_field(name='Online', value=f'{online_members_count}', inline=True)
+    members_embed.add_field(name='Offline', value=f'{offline_members_count}', inline=True)
+    members_embed.add_field(name='Idle', value=f'{idle_members_count}', inline=False)
+
+    await ctx.send(embed=members_embed)
 
 
 client.run(TOKEN)
